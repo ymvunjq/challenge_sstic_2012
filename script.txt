@@ -1,0 +1,60 @@
+key = "\xbb\xaa\xdd\xcc"
+extra = open("blob.bin","rb").read()
+self.cpu.ram_mips = open("layer2_unencode.bin","rb").read()
+self.cpu.ram_mips = self.cpu.ram_mips + "\x00"*(0x10000-len(self.cpu.ram_mips))
+self.cpu.ram_mips = self.cpu.ram_mips[0:0xa000] + key + self.cpu.ram_mips[0xa000+len(key):]
+self.cpu.ram_mips = self.cpu.ram_mips[0:0xa010] + extra + self.cpu.ram_mips[0xa010+len(extra):]
+
+self.cpu.registers[15].val = 0x950
+self.cpu.ram[0x11a] = "\x00\x40"
+self.cpu.registers[8].val = 0x120
+start 0x8a
+#h 0xaa print "DATA at %s" % hex(self.cpu.unpack(self.cpu.ram[self.cpu.registers[8].val+2]))
+#h 0x4f4 print "First bit = %u" % self.cpu.registers[0].val
+#h 0x502 print "2,3,4 bit = %u" % self.cpu.registers[0].val
+#h 0x544 print "OPCODE = %u" % self.cpu.registers[0].val
+#h 0x42e print "OPERAND = %r" % self.cpu.ram[0x126:0x128]
+#h 0x26c print "NB_BITS:%r" % self.cpu.registers[0].val,
+#h 0x2c6 print "VALUE:%s" % hex(self.cpu.registers[0].val)
+#h 0x4d6 print "IMMEDIATE VALUE"
+#h 0x4a8 print "DIRECT ADDRESSING"
+#h 0x3ee print "MOVO"
+#h 0x49a print "AUTRE: 1"
+#h 0x454 print "AUTRE: 2"
+#h 0x226 print "SIZE: %s" % hex(self.cpu.registers[10].val)
+
+
+######## WARNINGS #######
+#h 7b6 print "WARNING 1 *****************************"
+#h 7e0 print "WARNING 2 *****************************"
+#h 6ac print "WARNING UKN1 dans MOV *****************"
+#h 620 print "WARNING ** REGISTRE 15 (0x620)"
+#h 644 print "WARNING ** REGISTRE 14, on décrément le compteur (0x644)"
+#h 6c0 print "WARNING ** On va jouer avec PC (0x6c0)"
+#h 7e0 print "WARNING ** On va jumper mechant (0x7e0)"
+#h 7b6 print "WARNING ** Sauvegarde PC (0x7b6)"
+
+
+######## CMDS ###########
+h 0x5be self.cpu.cmd="NOT"
+h 0x58e self.cpu.cmd="AND"
+h 0x588 self.cpu.cmd="OR"
+h 0x60a self.cpu.cmd="MOV"
+h 0x600 self.cpu.cmd="SHL"
+h 0x5f6 self.cpu.cmd="SHR"
+h 0x566 self.cpu.cmd="JMP"
+h 0x4ec self.last_addr=hex(self.cpu.unpack(self.cpu.ram[0x11c:0x11e])*8+self.cpu.unpack(self.cpu.ram[0x11e:0x120]))
+h 0x4de if self.cpu.cmd is not None: print "%s => %s " % (self.last_addr,self.cpu.cmd)
+
+
+
+
+# VALUE
+#bc 0x4d6 lambda d:d.cpu.registers[0].val == 0xd8bf
+
+# ADDR
+#bc 0x4a2 lambda d:d.cpu.registers[0].val == 0xfa7a
+
+#bvm 6f05
+r
+
